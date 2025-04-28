@@ -3,6 +3,33 @@ import { Empleado, EmpleadoFormData } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Function to map database employee to our app's Empleado type
+const mapDbEmpleadoToEmpleado = (dbEmpleado: any): Empleado => ({
+  id: dbEmpleado.id,
+  nombre: dbEmpleado.nombre,
+  apellido: dbEmpleado.apellido,
+  email: dbEmpleado.email,
+  puesto: dbEmpleado.puesto,
+  departamento: dbEmpleado.departamento,
+  fechaContratacion: dbEmpleado.fecha_contratacion,
+  salario: dbEmpleado.salario,
+  telefono: dbEmpleado.telefono || undefined,
+  estado: dbEmpleado.activo ? 'activo' : 'inactivo'
+});
+
+// Function to map our app's EmpleadoFormData to database format
+const mapEmpleadoFormDataToDb = (formData: EmpleadoFormData) => ({
+  nombre: formData.nombre,
+  apellido: formData.apellido,
+  email: formData.email,
+  puesto: formData.puesto,
+  departamento: formData.departamento,
+  fecha_contratacion: formData.fechaContratacion,
+  salario: formData.salario,
+  telefono: formData.telefono,
+  activo: formData.estado === 'activo'
+});
+
 export const getEmpleados = async (): Promise<Empleado[]> => {
   try {
     const { data, error } = await supabase
@@ -16,7 +43,7 @@ export const getEmpleados = async (): Promise<Empleado[]> => {
       return [];
     }
 
-    return data;
+    return data.map(mapDbEmpleadoToEmpleado);
   } catch (error) {
     console.error("Error al obtener empleados:", error);
     toast.error("Error al cargar la lista de empleados");
@@ -38,7 +65,7 @@ export const getEmpleadoPorId = async (id: string): Promise<Empleado | undefined
       return undefined;
     }
 
-    return data;
+    return mapDbEmpleadoToEmpleado(data);
   } catch (error) {
     console.error(`Error al obtener empleado con ID ${id}:`, error);
     toast.error("Error al obtener los datos del empleado");
@@ -48,9 +75,11 @@ export const getEmpleadoPorId = async (id: string): Promise<Empleado | undefined
 
 export const crearEmpleado = async (empleado: EmpleadoFormData): Promise<Empleado> => {
   try {
+    const dbEmpleado = mapEmpleadoFormDataToDb(empleado);
+    
     const { data, error } = await supabase
       .from('empleados')
-      .insert([empleado])
+      .insert([dbEmpleado])
       .select()
       .single();
 
@@ -61,7 +90,7 @@ export const crearEmpleado = async (empleado: EmpleadoFormData): Promise<Emplead
     }
 
     toast.success("Empleado creado correctamente");
-    return data;
+    return mapDbEmpleadoToEmpleado(data);
   } catch (error) {
     console.error("Error al crear empleado:", error);
     toast.error("Error al crear el empleado");
@@ -71,9 +100,11 @@ export const crearEmpleado = async (empleado: EmpleadoFormData): Promise<Emplead
 
 export const actualizarEmpleado = async (id: string, datosActualizados: EmpleadoFormData): Promise<Empleado> => {
   try {
+    const dbEmpleado = mapEmpleadoFormDataToDb(datosActualizados);
+    
     const { data, error } = await supabase
       .from('empleados')
-      .update(datosActualizados)
+      .update(dbEmpleado)
       .eq('id', id)
       .select()
       .single();
@@ -85,7 +116,7 @@ export const actualizarEmpleado = async (id: string, datosActualizados: Empleado
     }
 
     toast.success("Empleado actualizado correctamente");
-    return data;
+    return mapDbEmpleadoToEmpleado(data);
   } catch (error) {
     console.error(`Error al actualizar empleado con ID ${id}:`, error);
     toast.error("Error al actualizar el empleado");
@@ -126,20 +157,21 @@ export const obtenerEstadisticas = async () => {
       throw error;
     }
 
-    const activos = empleados.filter(emp => emp.estado === 'activo').length;
-    const inactivos = empleados.length - activos;
+    const mapEmpleados = empleados.map(mapDbEmpleadoToEmpleado);
+    const activos = mapEmpleados.filter(emp => emp.estado === 'activo').length;
+    const inactivos = mapEmpleados.length - activos;
     
-    const departamentos = empleados.reduce((acc, emp) => {
+    const departamentos = mapEmpleados.reduce((acc, emp) => {
       acc[emp.departamento] = (acc[emp.departamento] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
     
-    const salarioPromedio = empleados.length > 0
-      ? empleados.reduce((sum, emp) => sum + emp.salario, 0) / empleados.length
+    const salarioPromedio = mapEmpleados.length > 0
+      ? mapEmpleados.reduce((sum, emp) => sum + emp.salario, 0) / mapEmpleados.length
       : 0;
     
     return {
-      total: empleados.length,
+      total: mapEmpleados.length,
       activos,
       inactivos,
       departamentos,
