@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import Index from "./pages/Index";
 import EmpleadosPage from "./pages/EmpleadosPage";
+import DocentesPage from "./pages/DocentesPage";
+import DocentesDashboardPage from "./pages/DocentesDashboardPage";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
@@ -22,6 +24,8 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/empleados" element={<EmpleadosPage />} />
+            <Route path="/docentes" element={<DocentesPage />} />
+            <Route path="/docentes/dashboard" element={<DocentesDashboardPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

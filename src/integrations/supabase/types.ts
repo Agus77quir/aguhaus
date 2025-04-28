@@ -144,6 +144,90 @@ export type Database = {
           },
         ]
       }
+      docente_materia: {
+        Row: {
+          created_at: string
+          docente_id: string
+          id: string
+          materia_id: string
+          periodo: string
+        }
+        Insert: {
+          created_at?: string
+          docente_id: string
+          id?: string
+          materia_id: string
+          periodo: string
+        }
+        Update: {
+          created_at?: string
+          docente_id?: string
+          id?: string
+          materia_id?: string
+          periodo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "docente_materia_docente_id_fkey"
+            columns: ["docente_id"]
+            isOneToOne: false
+            referencedRelation: "docentes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "docente_materia_materia_id_fkey"
+            columns: ["materia_id"]
+            isOneToOne: false
+            referencedRelation: "materias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      docentes: {
+        Row: {
+          activo: boolean | null
+          apellido: string
+          created_at: string
+          departamento: string
+          email: string
+          especialidad: string
+          fecha_contratacion: string
+          id: string
+          nombre: string
+          salario: number
+          telefono: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean | null
+          apellido: string
+          created_at?: string
+          departamento: string
+          email: string
+          especialidad: string
+          fecha_contratacion: string
+          id?: string
+          nombre: string
+          salario: number
+          telefono?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean | null
+          apellido?: string
+          created_at?: string
+          departamento?: string
+          email?: string
+          especialidad?: string
+          fecha_contratacion?: string
+          id?: string
+          nombre?: string
+          salario?: number
+          telefono?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       empleados: {
         Row: {
           activo: boolean | null
@@ -204,6 +288,21 @@ export type Database = {
         }
         Relationships: []
       }
+      "Empleados 1": {
+        Row: {
+          created_at: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
+      }
       Lovaemple: {
         Row: {
           created_at: string
@@ -216,6 +315,36 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
+        }
+        Relationships: []
+      }
+      materias: {
+        Row: {
+          created_at: string
+          creditos: number
+          departamento: string
+          descripcion: string | null
+          horas_semanales: number
+          id: string
+          nombre: string
+        }
+        Insert: {
+          created_at?: string
+          creditos: number
+          departamento: string
+          descripcion?: string | null
+          horas_semanales: number
+          id?: string
+          nombre: string
+        }
+        Update: {
+          created_at?: string
+          creditos?: number
+          departamento?: string
+          descripcion?: string | null
+          horas_semanales?: number
+          id?: string
+          nombre?: string
         }
         Relationships: []
       }

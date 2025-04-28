@@ -1,100 +1,208 @@
 
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, Menu, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  BookOpenText,
+  ChevronDown,
+  ChevronRight,
+  GraduationCap,
+  Home,
+  LayoutDashboard,
+  Menu,
+  Users,
+  X
+} from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import useMobile from "@/hooks/use-mobile";
 
-interface SidebarProps {
-  className?: string;
+interface SidebarLinkProps {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  isActive: boolean;
+  isMobile: boolean;
 }
 
-const Sidebar = ({ className }: SidebarProps) => {
-  const [collapsed, setCollapsed] = useState(false);
-  const location = useLocation();
+const SidebarLink = ({
+  href,
+  icon,
+  label,
+  isActive,
+  isMobile
+}: SidebarLinkProps) => {
+  return (
+    <Link
+      to={href}
+      className={cn(
+        "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+        isActive
+          ? "bg-accent text-accent-foreground"
+          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+        isMobile ? "text-base py-3" : ""
+      )}
+    >
+      {icon}
+      {label}
+    </Link>
+  );
+};
 
-  const toggleSidebar = () => {
-    setCollapsed(!collapsed);
-  };
+interface SidebarSectionProps {
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  isActive: boolean;
+  isMobile: boolean;
+}
+
+const SidebarSection = ({
+  label,
+  icon,
+  children,
+  isActive,
+  isMobile
+}: SidebarSectionProps) => {
+  const [isOpen, setIsOpen] = useState(isActive);
+
+  useEffect(() => {
+    if (isActive) {
+      setIsOpen(true);
+    }
+  }, [isActive]);
+
+  return (
+    <div className="space-y-1">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "flex w-full items-center justify-between rounded-md px-3 py-2 text-sm transition-colors",
+          isActive
+            ? "text-foreground hover:bg-accent/50"
+            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+          isMobile ? "text-base py-3" : ""
+        )}
+      >
+        <div className="flex items-center gap-3">
+          {icon}
+          <span>{label}</span>
+        </div>
+        {isOpen ? (
+          <ChevronDown className="h-4 w-4" />
+        ) : (
+          <ChevronRight className="h-4 w-4" />
+        )}
+      </button>
+      {isOpen && <div className="ml-6 space-y-1">{children}</div>}
+    </div>
+  );
+};
+
+const Sidebar = () => {
+  const location = useLocation();
+  const isMobile = useMobile();
+  const [open, setOpen] = useState(false);
+
+  const SidebarContent = () => (
+    <div className="flex h-full flex-col gap-4">
+      <div className="px-3 py-2">
+        <h2 className="mb-2 px-3 text-lg font-semibold tracking-tight">
+          Gestión Académica
+        </h2>
+        <div className="space-y-1">
+          <SidebarLink
+            href="/"
+            icon={<Home className="h-4 w-4" />}
+            label="Inicio"
+            isActive={location.pathname === "/"}
+            isMobile={isMobile}
+          />
+          
+          <SidebarSection
+            label="Empleados"
+            icon={<Users className="h-4 w-4" />}
+            isActive={location.pathname.includes("/empleados")}
+            isMobile={isMobile}
+          >
+            <SidebarLink
+              href="/empleados"
+              icon={<Users className="h-4 w-4" />}
+              label="Lista de Empleados"
+              isActive={location.pathname === "/empleados"}
+              isMobile={isMobile}
+            />
+          </SidebarSection>
+          
+          <SidebarSection
+            label="Docentes"
+            icon={<GraduationCap className="h-4 w-4" />}
+            isActive={location.pathname.includes("/docentes")}
+            isMobile={isMobile}
+          >
+            <SidebarLink
+              href="/docentes/dashboard"
+              icon={<LayoutDashboard className="h-4 w-4" />}
+              label="Dashboard"
+              isActive={location.pathname === "/docentes/dashboard"}
+              isMobile={isMobile}
+            />
+            <SidebarLink
+              href="/docentes"
+              icon={<GraduationCap className="h-4 w-4" />}
+              label="Lista de Docentes"
+              isActive={location.pathname === "/docentes"}
+              isMobile={isMobile}
+            />
+          </SidebarSection>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <Button
-          variant="outline"
-          size="icon"
-          className="rounded-full"
-          onClick={toggleSidebar}
-        >
-          <Menu />
-        </Button>
-      </div>
+      {!isMobile && (
+        <aside className="hidden lg:flex border-r w-64 flex-col">
+          <ScrollArea className="flex-1 pt-8">
+            <SidebarContent />
+          </ScrollArea>
+        </aside>
+      )}
 
-      <div
-        className={cn(
-          "fixed inset-0 bg-background/80 z-40 lg:hidden",
-          collapsed ? "hidden" : "block"
-        )}
-        onClick={toggleSidebar}
-      />
-
-      <aside
-        className={cn(
-          "fixed top-0 left-0 z-40 h-full bg-sidebar text-sidebar-foreground transition-all duration-300 lg:relative",
-          collapsed ? "-translate-x-full lg:translate-x-0 lg:w-20" : "w-64",
-          "lg:block",
-          className
-        )}
-      >
-        <div className="flex items-center justify-between h-16 px-4 border-b border-sidebar-border">
-          <h1 className={cn("font-bold text-xl", collapsed && "lg:hidden")}>
-            GestiónEmp
-          </h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground lg:flex"
-            onClick={toggleSidebar}
-          >
-            {collapsed ? <Menu /> : <X className="lg:hidden" />}
-          </Button>
-        </div>
-
-        <nav className="p-2">
-          <ul className="space-y-1">
-            <li>
-              <Link
-                to="/"
-                className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 hover:bg-sidebar-accent transition-colors",
-                  location.pathname === "/" && "bg-sidebar-accent"
-                )}
-                onClick={() => setCollapsed(true)}
-              >
-                <LayoutDashboard className="h-5 w-5" />
-                <span className={cn("text-sidebar-foreground", collapsed && "lg:hidden")}>
-                  Dashboard
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/empleados"
-                className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 hover:bg-sidebar-accent transition-colors",
-                  (location.pathname === "/empleados" || location.pathname.startsWith("/empleados/")) && "bg-sidebar-accent"
-                )}
-                onClick={() => setCollapsed(true)}
-              >
-                <Users className="h-5 w-5" />
-                <span className={cn("text-sidebar-foreground", collapsed && "lg:hidden")}>
-                  Empleados
-                </span>
-              </Link>
-            </li>
-          </ul>
-        </nav>
-      </aside>
+      {isMobile && (
+        <>
+          <Sheet open={open} onOpenChange={setOpen}>
+            <div className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center gap-4 border-b bg-background px-4 lg:hidden">
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="shrink-0">
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+              </SheetTrigger>
+              <div className="flex-1">Gestión Académica</div>
+            </div>
+            <SheetContent side="left" className="w-72 p-0">
+              <div className="flex h-16 items-center border-b px-4">
+                <div className="flex-1 text-lg font-semibold">
+                  Gestión Académica
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setOpen(false)}
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+              <div className="py-4">
+                <SidebarContent />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </>
+      )}
     </>
   );
 };
