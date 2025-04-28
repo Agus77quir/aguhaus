@@ -51,25 +51,26 @@ const EmpleadoForm = ({
   isLoading = false,
   title,
 }: EmpleadoFormProps) => {
+  // Define default values as a complete, non-optional object
+  const defaultValues: EmpleadoFormData = empleado || {
+    nombre: "",
+    apellido: "",
+    email: "",
+    puesto: "",
+    departamento: "",
+    fechaContratacion: new Date().toISOString().split("T")[0],
+    salario: 0,
+    telefono: "",
+    estado: "activo",
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: empleado
-      ? { ...empleado }
-      : {
-          nombre: "",
-          apellido: "",
-          email: "",
-          puesto: "",
-          departamento: "",
-          fechaContratacion: new Date().toISOString().split("T")[0],
-          salario: 0,
-          telefono: "",
-          estado: "activo",
-        },
+    defaultValues,
   });
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    onSubmit(values);
+    onSubmit(values as EmpleadoFormData);
   };
 
   return (
