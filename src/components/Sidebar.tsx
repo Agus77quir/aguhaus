@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -9,7 +10,6 @@ import {
   Home,
   LayoutDashboard,
   Menu,
-  Users,
   X
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -118,21 +118,6 @@ const Sidebar = () => {
             isActive={location.pathname === "/"}
             isMobile={isMobile}
           />
-          
-          <SidebarSection
-            label="Empleados"
-            icon={<Users className="h-4 w-4" />}
-            isActive={location.pathname.includes("/empleados")}
-            isMobile={isMobile}
-          >
-            <SidebarLink
-              href="/empleados"
-              icon={<Users className="h-4 w-4" />}
-              label="Lista de Empleados"
-              isActive={location.pathname === "/empleados"}
-              isMobile={isMobile}
-            />
-          </SidebarSection>
           
           <SidebarSection
             label="Docentes"
